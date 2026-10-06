@@ -1,0 +1,130 @@
+[
+  {
+    "slug": "26-train",
+    "year": "2026",
+    "caption": "出发。硬卧车厢里的第一张合影。",
+    "w": 800,
+    "h": 600,
+    "portrait": false
+  },
+  {
+    "slug": "26-arrive",
+    "year": "2026",
+    "caption": "下车，行李还没放下。",
+    "w": 800,
+    "h": 600,
+    "portrait": false
+  },
+  {
+    "slug": "26-flag",
+    "year": "2026",
+    "caption": "升旗。",
+    "w": 800,
+    "h": 1200,
+    "portrait": true
+  },
+  {
+    "slug": "26-class",
+    "year": "2026",
+    "caption": "一个班的孩子和他们的支教老师。",
+    "w": 800,
+    "h": 423,
+    "portrait": false
+  },
+  {
+    "slug": "26-meal",
+    "year": "2026",
+    "caption": "一起吃饭的晚上。",
+    "w": 800,
+    "h": 451,
+    "portrait": false
+  },
+  {
+    "slug": "26-birthday",
+    "year": "2026",
+    "caption": "有人在支教期间过生日。",
+    "w": 800,
+    "h": 600,
+    "portrait": false
+  },
+  {
+    "slug": "26-birthday2",
+    "year": "2026",
+    "caption": "同一个晚上。",
+    "w": 800,
+    "h": 600,
+    "portrait": false
+  },
+  {
+    "slug": "26-leaders",
+    "year": "2026",
+    "caption": "这一届的领队。",
+    "w": 800,
+    "h": 600,
+    "portrait": false
+  },
+  {
+    "slug": "26-banner",
+    "year": "2026",
+    "caption": "结束那天，学校送来锦旗：青春筑梦，情系乡村。",
+    "w": 800,
+    "h": 600,
+    "portrait": false
+  },
+  {
+    "slug": "25-class1",
+    "year": "2025",
+    "caption": "一班。",
+    "w": 800,
+    "h": 533,
+    "portrait": false
+  },
+  {
+    "slug": "25-class3",
+    "year": "2025",
+    "caption": "三班。",
+    "w": 800,
+    "h": 533,
+    "portrait": false
+  },
+  {
+    "slug": "25-class-a",
+    "year": "2025",
+    "caption": "教室后墙上写着「知识启迪智慧」。",
+    "w": 800,
+    "h": 533,
+    "portrait": false
+  },
+  {
+    "slug": "25-class-b",
+    "year": "2025",
+    "caption": "另一个班。",
+    "w": 800,
+    "h": 600,
+    "portrait": false
+  },
+  {
+    "slug": "25-closing",
+    "year": "2025",
+    "caption": "结营那天。",
+    "w": 800,
+    "h": 533,
+    "portrait": false
+  },
+  {
+    "slug": "25-perform",
+    "year": "2025",
+    "caption": "结营仪式上的表演。",
+    "w": 800,
+    "h": 515,
+    "portrait": false
+  },
+  {
+    "slug": "25-team",
+    "year": "2025",
+    "caption": "队员的工作牌拼在一起，是一整块拼图。",
+    "w": 800,
+    "h": 600,
+    "portrait": false
+  }
+]

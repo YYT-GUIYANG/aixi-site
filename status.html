@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>查询进度 · 爱西支教协会</title>
+<meta name="description" content="凭邮箱与凭证码查询爱西支教协会报名进度。">
+<meta name="theme-color" content="#2B2F4C">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="css/site.css">
+<style>
+  .sub-head {
+    background: var(--ink); color: #fff; padding: 22px 5vw;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .sub-head .logo { height: 38px; filter: brightness(0) invert(1); }
+  .page-hero { background: var(--ink); color: #fff; padding: 40px 5vw 66px; text-align: center; }
+  .page-hero .eyebrow { font-size: .78rem; letter-spacing: 4px; color: var(--lilac); margin: 0 0 14px; }
+  .page-hero h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.6rem); letter-spacing: 3px; }
+  .body-wrap { background: var(--paper-2); padding: 60px 5vw 90px; min-height: 46vh; }
+
+  /* 进度条：把状态画成看得懂的四步 */
+  .track { display: flex; gap: 0; margin: 8px 0 26px; }
+  .track .node { flex: 1; text-align: center; position: relative; font-size: .82rem; color: var(--muted-2); }
+  .track .node::before {
+    content: ""; display: block; height: 4px; background: var(--line); margin-bottom: 12px;
+  }
+  .track .node:first-child::before { border-radius: 2px 0 0 2px; }
+  .track .node:last-child::before { border-radius: 0 2px 2px 0; }
+  .track .node.done::before { background: var(--lilac); }
+  .track .node.done { color: var(--ink); font-weight: bold; }
+  .kv { border-top: 1px solid var(--line); margin-top: 22px; }
+  .kv div { display: flex; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: .93rem; }
+  .kv dt { flex: 0 0 96px; color: var(--muted); }
+  .kv dd { margin: 0; color: var(--ink-3); }
+</style>
+</head>
+<body>
+
+<header class="sub-head">
+  <a href="index.html" aria-label="返回首页"><img src="images/left-8.png" alt="爱西支教协会" class="logo"></a>
+  <div class="links">
+    <a href="apply.html" class="btn btn-primary btn-sm">去报名</a>
+    <a href="index.html" class="btn btn-white btn-sm">返回首页</a>
+  </div>
+</header>
+
+<section class="page-hero">
+  <p class="eyebrow">MY STATUS</p>
+  <h1>查询报名进度</h1>
+</section>
+
+<div class="body-wrap">
+  <div id="host">
+    <form class="form-card" id="qForm" novalidate>
+      <div class="notice notice-info" id="demoNote" style="display:none;">
+        <strong>演示模式</strong>：当前未连接云开发，只能查到在这台电脑上提交过的演示记录。
+      </div>
+      <p class="help" style="margin:0 0 24px;font-size:.95rem;">
+        用你报名时填的邮箱，加上提交成功后拿到的 8 位凭证码。凭证码丢了也不要紧，
+        直接用那个邮箱联系我们，或者关注公众号私信小西。
+      </p>
+
+      <div class="field" data-key="email">
+        <label for="qEmail">邮箱<span class="req">*</span></label>
+        <input class="input" type="email" id="qEmail" inputmode="email"
+               autocapitalize="off" spellcheck="false" maxlength="60" required>
+        <p class="err-msg" role="alert"></p>
+      </div>
+
+      <div class="field" data-key="ticket">
+        <label for="qTicket">凭证码<span class="req">*</span></label>
+        <input class="input" type="text" id="qTicket" maxlength="8"
+               style="letter-spacing:4px;text-transform:uppercase;font-family:ui-monospace,Menlo,monospace;">
+        <p class="help">8 位，不区分大小写。</p>
+        <p class="err-msg" role="alert"></p>
+      </div>
+
+      <div class="notice notice-err" id="qError" style="display:none;"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">查询</button>
+    </form>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="ft-inner">
+    <div class="ft-brand">
+      <img src="images/left-8.png" alt="爱西支教协会" class="ft-logo">
+      <div class="ft-slogan">爱西支教协会 &nbsp;|&nbsp; WE ARE ALL THE SAME</div>
+    </div>
+    <div class="ft-links">
+      <a href="index.html">回到首页</a>
+      <a href="stories.html">支教现场</a>
+      <a href="apply.html">报名投递</a>
+      <a href="privacy.html">隐私声明</a>
+      <a href="admin.html" style="opacity:.75;">领队入口</a>
+    </div>
+  </div>
+  <div class="ft-bottom">华南理工大学 · 爱西支教协会，创立于 2008 年<span data-icp></span></div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<!-- 修改已提交内容要复用报名页那套表单引擎，所以这三个也要加载。
+     cloud.js 是懒加载壳，只有真的换简历时才会拉 718KB 的 SDK。 -->
+<script src="js/cloud.js"></script>
+<script src="js/schema.js"></script>
+<script src="js/forms.js"></script>
+<script>
+(function () {
+  "use strict";
+  var RE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  var host = document.getElementById("host");
+  var form = document.getElementById("qForm");
+  var errBox = document.getElementById("qError");
+
+  if (window.AixiApi && window.AixiApi.isDemo) {
+    document.getElementById("demoNote").style.display = "block";
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  function bad(key, msg) {
+    var w = form.querySelector('.field[data-key="' + key + '"]');
+    w.classList.toggle("has-error", !!msg);
+    w.querySelector(".err-msg").textContent = msg || "";
+    return !msg;
+  }
+
+  /* 状态在流程里的位置。云函数返回的 status 是中文短语，这里映射成第几步。 */
+  /* 进度条的四个节点，与后台的状态词表同源（见 js/admin.js 的 STATUS_OPTIONS）。
+     改环节时两处都要改，否则报名者看到的进度和领队设的状态会对不上。 */
+  var STAGES = ["已收到", "初筛通过", "一面通过", "作业通过", "二面通过"];
+  function stageIndex(status) {
+    var s = String(status || "");
+    if (/未通过|落选/.test(s)) return -1;   // 终态，不画正向进度条
+    if (/已录取/.test(s)) return 5;         // 超过最后一个节点，全部点亮
+    if (/二面通过/.test(s)) return 4;
+    if (/作业通过/.test(s)) return 3;
+    if (/作业待评|已交作业/.test(s)) return 2;  // 交了但还没出结果，停在一面通过那格
+    if (/一面通过/.test(s)) return 2;
+    if (/初筛通过/.test(s)) return 1;
+    return 0;                               // 已收到
+  }
+
+  function showResult(r) {
+    var idx = stageIndex(r.status);
+    var trackHtml = idx < 0 ? "" : '<div class="track">' + STAGES.map(function (n, i) {
+      return '<div class="node' + (i <= idx ? " done" : "") + '">' + esc(n) + "</div>";
+    }).join("") + "</div>";
+
+    host.innerHTML = '<div class="form-card">'
+      + (r.demo ? '<div class="notice notice-warn"><strong>演示模式</strong>：这是本机的演示记录。</div>' : "")
+      + '<div class="notice ' + (/未通过|落选/.test(String(r.status || "")) ? "notice-info" : "notice-ok")
+      + '" style="margin-bottom:24px;">当前状态：<strong>'
+      + esc(r.status || "已收到") + "</strong>"
+      + (/已录取/.test(String(r.status || ""))
+        ? "　🎉 恭喜，你已通过全部选拔环节。"
+        : /未通过|落选/.test(String(r.status || ""))
+          ? "　本次选拔已结束，详情见我们发给你的邮件。"
+          : "")
+      + "</div>"
+      + trackHtml
+      + '<dl class="kv">'
+      + (r.name ? "<div><dt>姓名</dt><dd>" + esc(r.name) + "</dd></div>" : "")
+      + (r.formType ? "<div><dt>报名类型</dt><dd>" + esc(r.formType) + "</dd></div>" : "")
+      + (r.createdAt ? "<div><dt>提交时间</dt><dd>"
+        + esc(String(r.createdAt).replace("T", " ").slice(0, 16)) + "</dd></div>" : "")
+      + (r.hasResume !== undefined
+        ? "<div><dt>简历附件</dt><dd>" + (r.hasResume ? "已收到" : "未上传") + "</dd></div>" : "")
+      + "</dl>"
+      + (r.note ? '<p class="help" style="margin-top:18px;">' + esc(r.note) + "</p>" : "")
+      + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;">'
+      + (r.canEdit
+        ? '<button type="button" class="btn btn-primary" id="editBtn">修改我的报名信息</button>'
+        : "")
+      + '<button type="button" class="btn btn-ghost" id="again" style="color:var(--ink);">查另一条</button>'
+      + '<a class="btn ' + (r.canEdit ? "btn-ghost" : "btn-primary") + '" href="index.html"'
+      + (r.canEdit ? ' style="color:var(--ink);"' : "") + '>回到首页</a>'
+      + "</div>"
+      + (r.canEdit
+        ? '<p class="help" style="margin-top:14px;">报名通道开放期间可以反复修改，改多少次都可以。</p>'
+        : '<p class="help" style="margin-top:14px;">报名通道已关闭，内容不能再改。确有需要请直接回信联系我们。</p>')
+      + "</div>";
+
+    document.getElementById("again").addEventListener("click", function () {
+      location.reload();
+    });
+
+    var editBtn = document.getElementById("editBtn");
+    if (editBtn) editBtn.addEventListener("click", function () { showEdit(r); });
+  }
+
+  /* 当前这次查询用的凭据。修改时要原样带回服务端再验一次 ——
+     前端记着它只是为了免得用户再敲一遍，服务端绝不会因为「前端说验过了」就放行。 */
+  var cred = { email: "", ticket: "" };
+
+  /** 修改已提交的内容。复用报名页那套表单引擎，带初值渲染。 */
+  function showEdit(r) {
+    var isAnni = r.formTypeRaw === "anniversary";
+    var schema = (window.AIXI_SCHEMAS || {})[isAnni ? "anniversary" : "recruit"];
+    if (!schema || !window.AixiForms) {
+      alert("表单定义没加载出来，请刷新页面重试。");
+      return;
+    }
+
+    host.innerHTML = '<div class="notice notice-info" style="max-width:720px;margin:0 auto 22px;">'
+      + "<strong>正在修改你的报名信息。</strong> 改完点最下方的按钮保存。"
+      + (r.hasResume
+        ? " 你之前已上传过简历；<strong>重新选一个文件会替换掉旧的</strong>，不选就保持原样。"
+        : " 你还没上传过简历，可以在这里补上。")
+      + "</div><div id=\"editHost\"></div>";
+
+    window.AixiForms.mount({
+      schema: schema,
+      host: document.getElementById("editHost"),
+      formType: isAnni ? "anniversary" : "recruit",
+      values: r.data || {},
+      hideAgree: true,
+      submitFn: function (data, fileId) {
+        return window.AixiApi.updateSubmission(cred.email, cred.ticket, data, fileId);
+      },
+      onSuccess: function (res) {
+        host.innerHTML = '<div class="form-card">'
+          + '<div class="notice notice-ok" style="margin-bottom:22px;"><strong>已保存。</strong> '
+          + (res && res.replacedResume ? "简历已替换为你刚上传的那份。"
+            : (res && res.hasResume ? "简历保持为原来那份。" : ""))
+          + "</div>"
+          + '<p class="help" style="margin:0 0 22px;">报名通道开放期间可以继续修改，次数不限。</p>'
+          + '<div style="display:flex;gap:12px;flex-wrap:wrap;">'
+          + '<button type="button" class="btn btn-primary" id="again2">再查一次看看</button>'
+          + '<a class="btn btn-ghost" href="index.html" style="color:var(--ink);">回到首页</a>'
+          + "</div></div>";
+        document.getElementById("again2").addEventListener("click", function () {
+          location.reload();
+        });
+      }
+    });
+
+    // 邮箱锁死：凭证码是按邮箱算哈希的，改了就查不到自己
+    var em = document.querySelector('#editHost [name="email"]');
+    if (em) {
+      em.readOnly = true;
+      em.style.background = "var(--paper-2)";
+      em.style.color = "var(--muted)";
+      var h = em.parentNode.querySelector(".help");
+      if (h) h.textContent = "邮箱不能自行修改 —— 凭证码是按它生成的。需要换邮箱请回信联系我们。";
+    }
+
+    host.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    errBox.style.display = "none";
+
+    var email = document.getElementById("qEmail").value.trim();
+    var ticket = document.getElementById("qTicket").value.trim().toUpperCase();
+
+    var ok = true;
+    ok = bad("email", !email ? "请填邮箱" : (!RE_EMAIL.test(email) ? "邮箱格式看起来不对" : "")) && ok;
+    ok = bad("ticket", !ticket ? "请填凭证码" : (ticket.length !== 8 ? "凭证码是 8 位" : "")) && ok;
+    if (!ok) return;
+
+    var btn = form.querySelector("button[type=submit]");
+    btn.disabled = true;
+    btn.textContent = "查询中…";
+
+    window.AixiApi.queryStatus(email, ticket).then(function (r) {
+      cred.email = email; cred.ticket = ticket;
+      showResult(r || {});
+    }).catch(function (err) {
+      btn.disabled = false;
+      btn.textContent = "查询";
+      errBox.textContent = (err && err.message) || "查询失败，请稍后重试。";
+      errBox.style.display = "block";
+    });
+  });
+})();
+</script>
+<script src="js/beian.js"></script>
+</body>
+</html>

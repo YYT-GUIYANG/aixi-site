@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>爱西支教协会 · 携爱西行</title>
+<meta name="description" content="爱西支教协会创立于 2008 年，是华南理工大学的学生公益支教团队。十八年来，爱西在祖国西部留下了一串串爱的脚印。">
+<meta name="theme-color" content="#2B2F4C">
+
+<!-- 分享到微信/朋友圈时的图文摘要。
+     注意：og:image 必须是完整的 http(s) 绝对地址，微信不认相对路径。
+     拿到新环境的域名后改成完整的 https:// 绝对地址（微信不认相对路径）。
+     上线自检会提醒这一项。 -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="爱西支教协会 · 携爱西行">
+<meta property="og:description" content="十八年来，爱西在祖国西部留下了一串串爱的脚印。WE ARE ALL THE SAME。">
+<meta property="og:image" content="https://ix-d1ga24mwn2a64da28-1467718879.tcloudbaseapp.com/images/og-cover.jpg">
+
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="css/site.css">
+
+<!-- GSAP 走本地，不再依赖 CDN。
+     必须放在 head 且同步加载：紧接着的探测脚本要在 body 渲染前决定有没有动效，
+     否则「先显示再隐藏」会闪一下。两个文件合计 114KB，本地解析很快。 -->
+<script src="js/vendor/gsap.min.js"></script>
+<script src="js/vendor/ScrollTrigger.min.js"></script>
+<script>
+  /* 只有 GSAP 真的可用、且用户没有要求减少动效时，才给 html 打上 has-anim。
+     没有它，页面就是一份完整可读的静态页 —— 这是安全网，不是可选项。 */
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (window.gsap && window.ScrollTrigger && !reduce) {
+      document.documentElement.className += ' has-anim';
+    }
+  })();
+</script>
+
+<style>
+  /* ===== 首屏转场 ===== */
+  .hero-transition-box {
+    position: relative; height: 100vh; width: 100%;
+    background-color: #E8E8E8; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hero-image-frame {
+    position: absolute; inset: 0;
+    background-image: url('images/hero-bg.jpg');
+    background-size: cover; background-position: center;
+    border-radius: 20px; transform-origin: center center; z-index: 1;
+  }
+  .philosophy-layer {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  /* 有动效时初始透明，由滚动进度推着显现；没动效时直接可见 */
+  html.has-anim .philosophy-layer { opacity: 0; }
+  .small-logo-tag {
+    position: absolute; top: 108px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: #fff; opacity: .8; text-align: center;
+  }
+  .marquee-container { position: absolute; width: 100%; overflow: hidden; white-space: nowrap; }
+  .marquee-text {
+    font-size: 15vw; font-weight: bold; color: rgba(255,255,255,.05);
+    letter-spacing: 5px; display: inline-block;
+  }
+  .philosophy-text-img {
+    width: 85vw; max-width: 1100px; height: auto; object-fit: contain;
+    filter: brightness(0) invert(1); z-index: 10;
+  }
+  .scroll-hint {
+    position: absolute; bottom: 34px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,.75); font-size: .75rem; letter-spacing: 3px; z-index: 11;
+  }
+
+  /* ===== 荣誉墙 ===== */
+  .awards-section {
+    min-height: 100vh; background-color: var(--ink); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    padding: 110px 5vw;
+  }
+  .awards-container { text-align: center; max-width: 900px; }
+  .awards-icon-img { height: 96px; width: auto; object-fit: contain; filter: brightness(0) invert(1); margin-bottom: 46px; }
+  .awards-list { list-style: none; padding: 0; margin: 0; }
+  .awards-list li { font-size: 1.18rem; line-height: 2.1; margin-bottom: 10px; letter-spacing: 1px; }
+  @media (max-width: 640px) {
+    .awards-list li { font-size: 1rem; line-height: 1.85; text-align: left; }
+  }
+
+  /* ===== 历年画卷 ===== */
+  .story-section {
+    height: 100vh; background-color: var(--ink); color: #fff;
+    overflow: hidden; position: relative;
+  }
+  .story-wrapper {
+    display: flex; height: 100%; width: max-content; align-items: center;
+    padding-left: 10vw; padding-right: 20vw;
+  }
+  .story-timeline-item {
+    width: 32vw; display: flex; flex-direction: column; gap: 18px;
+    margin-right: 12vw; flex-shrink: 0;
+  }
+  .story-timeline-item .time-img { width: 100%; object-fit: cover; border-radius: 8px; }
+  .story-timeline-item h4 { font-size: 1.18rem; margin: 0 0 5px; font-weight: normal; }
+  .story-timeline-item p { font-size: .94rem; line-height: 1.6; margin: 0; opacity: .8; }
+  .align-top { align-self: flex-start; margin-top: 15vh; }
+  .align-center { align-self: center; }
+  .align-bottom { align-self: flex-end; margin-bottom: 15vh; }
+  .story-summary-item {
+    width: 60vw; display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: 26px; align-self: center; margin-right: 16vw; flex-shrink: 0;
+  }
+  .summary-img-group { display: flex; gap: 18px; width: 100%; }
+  /* min-width:0 是必需的：图片是替换元素，flex 项的 min-width:auto 会按
+     「高度 × 宽高比」算出一个最小宽度（22vh 高 × 1.5 = 279px），
+     两张并排就撑破窄屏，整页出现横向滚动。加了它才能真正收缩，
+     object-fit:cover 会裁切而不是压扁。 */
+  .summary-img-group .time-img {
+    flex: 1; min-width: 0; height: 35vh; object-fit: cover; border-radius: 8px;
+  }
+  .summary-text { font-size: 1.06rem; line-height: 2; max-width: 800px; }
+
+  /* 手机 / 无动效：画卷不再横向钉屏滚动，改成正常纵向阅读。
+     横向钉屏在手机上很难操作，而且没有 GSAP 时根本不成立。 */
+  .story-section.is-static { height: auto; overflow: visible; padding: 90px 0; }
+  .story-section.is-static .story-wrapper {
+    flex-direction: column; width: 100%; height: auto; align-items: stretch;
+    padding: 0 5vw; gap: 56px;
+  }
+  .story-section.is-static .story-timeline-item,
+  .story-section.is-static .story-summary-item {
+    width: 100%; max-width: 620px; margin: 0 auto; align-self: center;
+  }
+  .story-section.is-static .align-top,
+  .story-section.is-static .align-bottom { margin-top: 0; margin-bottom: 0; }
+  .story-section.is-static .time-img { max-height: 46vh; }
+  .story-section.is-static .summary-img-group .time-img { height: 22vh; min-width: 0; }
+
+  /* 窄屏上两张并排只剩不到 160px 宽，看不清内容，改成上下排 */
+  @media (max-width: 640px) {
+    .summary-img-group { flex-direction: column; }
+    .story-section.is-static .summary-img-group .time-img { height: 26vh; }
+  }
+
+  /* ===== 数字成果 ===== */
+  .impact { padding: 100px 5vw; background: #fff; }
+  .impact-inner { max-width: var(--maxw); margin: 0 auto; }
+
+  /* ===== 爱西动态 ===== */
+  .news { padding: 100px 5vw 110px; background: var(--paper-2); }
+  .news-inner { max-width: var(--maxw); margin: 0 auto; }
+  .news-empty {
+    text-align: center; padding: 54px 24px; background: #fff;
+    border: 1px dashed var(--line); border-radius: var(--radius); color: var(--muted);
+  }
+  .news-empty .qr { width: 148px; height: auto; margin: 18px auto 0; display: block; border-radius: 8px; }
+  .news-foot { text-align: center; margin-top: 40px; }
+
+  /* ===== 招新筹备 ===== */
+  .recruit-hero {
+    height: 100vh; background-image: url('images/flow.jpg');
+    background-size: cover; background-position: center;
+  }
+  .recruit-details {
+    min-height: 100vh; background-color: var(--ink); color: #fff;
+    display: flex; justify-content: center; align-items: center;
+    padding: 110px 5vw; overflow: hidden;
+  }
+  .recruit-container { display: flex; width: 100%; max-width: var(--maxw); gap: 5vw; }
+  .recruit-left { flex: 1; }
+  .recruit-left h2 { font-size: clamp(2rem, 5vw, 3rem); margin: 0; letter-spacing: 2px; }
+  .recruit-left h3 { font-size: 1.4rem; margin: 5px 0 28px; opacity: .55; letter-spacing: 1px; font-weight: normal; }
+  .recruit-left p { font-size: 1.05rem; line-height: 1.85; opacity: .82; margin: 0 0 18px; max-width: 30em; }
+  .recruit-timeline {
+    margin-top: 36px; border-left: 2px solid rgba(255,255,255,.3); padding-left: 28px;
+    display: flex; flex-direction: column; gap: 34px;
+  }
+  .rt-item { position: relative; }
+  .rt-dot {
+    position: absolute; left: -36px; top: 5px; width: 10px; height: 10px; border-radius: 50%;
+    background-color: #fff; border: 4px solid var(--ink);
+  }
+  .rt-content h4 { margin: 0 0 8px; font-size: 1.15rem; }
+  .rt-content p { margin: 0; font-size: .93rem; opacity: .7; }
+  .recruit-cta { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .recruit-cta .cta-note { font-size: .85rem; opacity: .65; }
+  .recruit-right { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 34px; }
+  .recruit-img { object-fit: cover; border-radius: 8px; }
+  .recruit-img-top { width: 80%; height: 30vh; align-self: flex-end; }
+  .recruit-img-bottom { width: 80%; height: 35vh; align-self: flex-start; }
+
+  @media (max-width: 900px) {
+    .recruit-container { flex-direction: column; align-items: flex-start; }
+    .recruit-right { margin-top: 36px; width: 100%; flex-direction: row; gap: 16px; }
+    .recruit-img, .recruit-img-top, .recruit-img-bottom {
+      width: 50%; height: 26vh; align-self: stretch;
+    }
+  }
+
+  /* ===== 联系我们 ===== */
+  .contact-section { min-height: 100vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .contact-banner {
+    background-color: var(--ink-2); color: var(--lilac);
+    text-align: center; padding: 15px 5vw; font-size: .9rem; z-index: 2;
+  }
+  .contact-banner p { margin: 0 0 5px; letter-spacing: 2px; }
+  .banner-years { font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .banner-icon-img { height: 20px; width: auto; object-fit: contain; filter: brightness(0) invert(1); }
+  .contact-content {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 80px 5vw; background-color: #111; color: var(--lilac);
+  }
+  .contact-header { text-align: center; margin-bottom: 54px; }
+  .contact-header h2 { font-size: clamp(2.4rem, 7vw, 4rem); margin: 0; color: #E8E8E8; letter-spacing: 5px; font-weight: 900; }
+  .contact-header h3 { font-size: clamp(1.5rem, 4vw, 2.5rem); margin: 0; font-weight: 900; letter-spacing: 3px; }
+  .qr-wrapper { display: flex; gap: 8vw; flex-wrap: wrap; justify-content: center; }
+  .qr-item { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .qr-img { width: 230px; height: auto; object-fit: contain; border-radius: 10px; background: #fff; padding: 8px; }
+  .qr-item p { font-size: 1.3rem; font-weight: bold; margin: 0; letter-spacing: 2px; }
+  @media (max-width: 768px) {
+    .qr-wrapper { flex-direction: column; align-items: center; gap: 40px; }
+    .qr-img { width: 62vw; max-width: 250px; }
+  }
+
+</style>
+</head>
+<body>
+
+<header class="navbar" id="navbar">
+  <div class="nav-left">
+    <a href="#hero" aria-label="爱西支教协会 首页">
+      <img src="images/left-8.png" alt="爱西支教协会" class="nav-logo">
+    </a>
+  </div>
+  <div class="nav-right">
+    <a href="apply.html" class="btn btn-primary">报名</a>
+    <a href="#contact" class="btn btn-white nav-contact">CONTACT</a>
+    <button class="btn btn-white btn-icon" id="menuToggleBtn"
+            aria-label="打开菜单" aria-expanded="false" aria-controls="menuOverlay">
+      <svg id="hamburger-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<nav class="menu-overlay" id="menuOverlay" aria-label="站点导航">
+  <div class="menu-left-images">
+    <a href="#story" class="menu-img-link" style="grid-row: span 2;">
+      <img class="menu-img" src="images/Summary Image 1.jpg" alt="历年支教" loading="lazy">
+    </a>
+    <a href="#recruit-hero" class="menu-img-link">
+      <img class="menu-img" src="images/Right Image 1.jpg" alt="招新筹备" loading="lazy">
+    </a>
+    <a href="#contact" class="menu-img-link">
+      <img class="menu-img" src="images/2022.jpg" alt="联系我们" loading="lazy">
+    </a>
+  </div>
+  <div class="menu-right-links">
+    <a href="#hero" class="menu-link">回到主页</a>
+    <a href="#story" class="menu-link">支教故事</a>
+    <a href="#awards" class="menu-link">成果与荣誉</a>
+    <a href="#news" class="menu-link">爱西动态</a>
+    <a href="stories.html" class="menu-link">支教现场</a>
+    <a href="#recruit-hero" class="menu-link">招新筹备</a>
+    <a href="apply.html" class="menu-link is-cta">报名投递</a>
+    <a href="#contact" class="menu-link">联系我们</a>
+  </div>
+  <div class="menu-footer-tag">
+    <img src="images/logo-8.png" alt="" class="tag-icon">
+    <div class="tag-text-small">Ix Volunteer teaching team<br>Since 2008</div>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ============ 首屏 ============ -->
+  <section id="hero" class="hero-transition-box">
+    <div class="hero-image-frame"></div>
+    <div class="philosophy-layer">
+      <div class="small-logo-tag">
+        <img src="images/logo-8.png" alt="" class="tag-icon">
+        <div class="tag-text-small">Ix Volunteer teaching team<br>Since 2008</div>
+      </div>
+      <div class="marquee-container" aria-hidden="true">
+        <div class="marquee-text">WE ARE ALL THE SAME WE ARE ALL THE SAME WE ARE ALL THE SAME WE ARE ALL THE SAME </div>
+      </div>
+      <img src="images/text-8.png" alt="携爱西行" class="philosophy-text-img">
+    </div>
+    <div class="scroll-hint" aria-hidden="true">向下滚动</div>
+  </section>
+
+  <!-- ============ 荣誉墙 ============ -->
+  <section id="awards" class="awards-section" data-nav-dark>
+    <div class="awards-container">
+      <img src="images/awards-8.png" alt="Our Awards" class="awards-icon-img" data-anim="fade-up">
+      <ul class="awards-list">
+        <li data-anim="fade-up">2013 年首届公益文化节十佳公益团队第二名</li>
+        <li data-anim="fade-up">2013 年中原地产原创视觉大赛入围奖</li>
+        <li data-anim="fade-up">2013 年阿克苏诺贝尔大学生公益奖三等奖</li>
+        <li data-anim="fade-up">2014 年第二届公益文化节十佳公益达人</li>
+        <li data-anim="fade-up">2015 年第三届公益文化节十佳公益团队第一名</li>
+        <li data-anim="fade-up">2015 年第二届“启蒙者计划之 3T 训练营”支教成果展团体第一名</li>
+        <li data-anim="fade-up">2016 年阿克苏诺贝尔中国大学生社会公益奖团队第一名</li>
+        <li data-anim="fade-up">2017 年第四届“启蒙者计划之 3T 训练营”支教成果展团体第一名</li>
+        <li data-anim="fade-up">2025 年华南理工大学学生志愿者暑期“三下乡”社会实践活动优秀实践团队</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 历年画卷 ============ -->
+  <section id="story" class="story-section">
+    <div class="story-wrapper">
+
+      <div class="story-timeline-item align-top">
+        <div>
+          <h4>2008 年</h4>
+          <p>华南理工大学的 3 名贵州籍大学生创立了爱西支教队</p>
+        </div>
+        <img class="time-img" style="height:45vh;" src="images/2008.jpg" alt="2008 年支教照片" loading="lazy">
+      </div>
+
+      <div class="story-timeline-item align-bottom">
+        <div>
+          <h4>2013 年</h4>
+          <p>爱西开始独立运营支教活动</p>
+        </div>
+        <img class="time-img" style="height:35vh;" src="images/2013.jpg" alt="2013 年支教照片" loading="lazy">
+      </div>
+
+      <div class="story-timeline-item align-top">
+        <div>
+          <h4>2018 年</h4>
+          <p>采取“主题+”的课程形式，专注于学生各项素质的发展</p>
+        </div>
+        <img class="time-img" style="height:30vh;" src="images/2018.jpg" alt="2018 年支教照片" loading="lazy">
+      </div>
+
+      <div class="story-timeline-item align-center">
+        <div>
+          <h4>2019 年</h4>
+          <p>延续并发挥“主题+”夏令营模式</p>
+        </div>
+        <img class="time-img" style="height:25vh;" src="images/2019.jpg" alt="2019 年支教照片" loading="lazy">
+      </div>
+
+      <div class="story-timeline-item align-bottom">
+        <div>
+          <h4>2022 年</h4>
+          <p>完善兴趣课机制</p>
+        </div>
+        <img class="time-img" style="height:40vh;" src="images/2022.jpg" alt="2022 年支教照片" loading="lazy">
+      </div>
+
+      <div class="story-summary-item">
+        <div class="summary-img-group">
+          <img class="time-img" src="images/Summary Image 1.jpg" alt="支教现场" loading="lazy">
+          <img class="time-img" src="images/Summary Image 2.jpg" alt="支教现场" loading="lazy">
+        </div>
+        <p class="summary-text">十八年来，从织金、纳雍、金沙、闽中，再到松桃、播泉、丹寨……爱西在祖国西部留下了一串串爱的脚印。2026 年，爱西的课堂开到了河南。如今，爱西已经成长为一个专业、经验丰富、成熟、有实力的公益团队。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 数字成果 ============ -->
+  <section id="impact" class="impact">
+    <div class="impact-inner">
+      <div class="section-head" data-anim="fade-up">
+        <p class="eyebrow">Our Impact</p>
+        <h2>十八年，走过的路</h2>
+        <p class="sub">WE ARE ALL THE SAME</p>
+      </div>
+      <div class="stats">
+        <div class="stat" data-anim="fade-up">
+          <div class="num">18<span class="unit">年</span></div>
+          <div class="cap">持续支教</div>
+        </div>
+        <div class="stat" data-anim="fade-up">
+          <div class="num">10<span class="unit">+ 个</span></div>
+          <div class="cap">支教点</div>
+        </div>
+        <!-- 360 = 18 届 × 每届约 20 人。改届数或人数时记得一起改。 -->
+        <div class="stat" data-anim="fade-up">
+          <div class="num">360<span class="unit">+ 名</span></div>
+          <div class="cap">历届队员</div>
+        </div>
+        <div class="stat" data-anim="fade-up">
+          <div class="num is-word">数千<span class="unit">名</span></div>
+          <div class="cap">服务孩子</div>
+        </div>
+        <!-- 3024 = 168 × 18 -->
+        <div class="stat" data-anim="fade-up">
+          <div class="num">3024<span class="unit">小时</span></div>
+          <div class="cap">累计志愿时</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 爱西动态（公众号文章卡片，由后台录入） ============ -->
+  <section id="news" class="news">
+    <div class="news-inner">
+      <div class="section-head" data-anim="fade-up">
+        <p class="eyebrow">Latest</p>
+        <h2>爱西动态</h2>
+        <p class="sub">来自爱西支教协会公众号</p>
+      </div>
+
+      <!-- 卡片由 home.js 渲染；读不到或还没录入时显示下面的空状态 -->
+      <div class="cards" id="newsCards" hidden></div>
+
+      <div class="news-empty" id="newsEmpty">
+        <p style="margin:0;">动态还没有录入。<br>在<a href="admin.html" style="color:var(--ink);font-weight:bold;">后台</a>「公众号动态」里贴上文章标题和链接，<br>或者直接填 <code>data/posts.json</code>，这里就会显示。</p>
+        <img class="qr" src="images/QR Code 1.png" alt="爱西支教协会公众号二维码" loading="lazy">
+        <p style="margin:14px 0 0;font-size:.85rem;">扫码关注公众号</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 招新筹备 ============ -->
+  <section id="recruit-hero" class="recruit-hero" aria-label="招新培训现场" data-nav-dark></section>
+
+  <section id="recruit-details" class="recruit-details" data-nav-dark>
+    <div class="recruit-container">
+      <div class="recruit-left">
+        <h2>招新筹备</h2>
+        <h3>PREPARATION</h3>
+        <p>在每年春季的招新中，爱西本着认真负责的态度，以严苛谨慎的标准选择与爱西团队理念相符、愿意与爱西携手同行的新成员。</p>
+        <p>选拔分为简历初筛、一面车轮面、线上作业、二面群面几轮，旨在从不同方面和层次考察面试者的综合素质和理想信念。通过之后还有破冰与两轮集中培训。</p>
+
+        <div class="recruit-timeline">
+          <div class="rt-item" data-anim="fade-up">
+            <div class="rt-dot"></div>
+            <div class="rt-content">
+              <h4>3 月初</h4>
+              <p>开始招新，报名投递简历，随后进行简历初筛</p>
+            </div>
+          </div>
+          <div class="rt-item" data-anim="fade-up">
+            <div class="rt-dot"></div>
+            <div class="rt-content">
+              <h4>3 月末</h4>
+              <p>一面，车轮面形式</p>
+            </div>
+          </div>
+          <div class="rt-item" data-anim="fade-up">
+            <div class="rt-dot"></div>
+            <div class="rt-content">
+              <h4>一面之后</h4>
+              <p>线上作业，写下你对支教的思考</p>
+            </div>
+          </div>
+          <div class="rt-item" data-anim="fade-up">
+            <div class="rt-dot"></div>
+            <div class="rt-content">
+              <h4>4 月中旬</h4>
+              <p>二面，群面形式</p>
+            </div>
+          </div>
+          <div class="rt-item" data-anim="fade-up">
+            <div class="rt-dot"></div>
+            <div class="rt-content">
+              <h4>5 — 7 月</h4>
+              <p>破冰、一培、二培，出发前总会议后启程</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="recruit-cta">
+          <a href="apply.html" class="btn btn-primary">前往报名 / 投递简历</a>
+          <span class="cta-note" id="recruitStateNote">正在读取报名开放状态…</span>
+        </div>
+      </div>
+
+      <div class="recruit-right">
+        <img class="recruit-img recruit-img-top" src="images/Right Image 1.jpg" alt="招新现场" loading="lazy">
+        <img class="recruit-img recruit-img-bottom" src="images/Right Image 2.jpg" alt="培训现场" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 联系我们 ============ -->
+  <section id="contact" class="contact-section" data-nav-dark>
+    <div class="contact-banner">
+      <p id="contactBannerNote">— 爱西 <span data-recruit-year>2027</span> 年度队员招新，每年 3 月开启 —</p>
+      <div class="banner-years">
+        2008
+        <img src="images/logo-8.png" alt="" class="banner-icon-img">
+        <span data-year-now>2026</span>
+      </div>
+    </div>
+
+    <div class="contact-content">
+      <div class="contact-header" data-anim="fade-up">
+        <h2>联系我们</h2>
+        <h3>CONTACT US</h3>
+      </div>
+      <div class="qr-wrapper">
+        <div class="qr-item" data-anim="fade-up">
+          <img class="qr-img" src="images/QR Code 1.png" alt="爱西微信公众号二维码" loading="lazy">
+          <p>爱西微信公众号</p>
+        </div>
+        <div class="qr-item" data-anim="fade-up">
+          <img class="qr-img" src="images/QR Code 2.png" alt="小西的微信二维码" loading="lazy">
+          <p>小西的微信</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="ft-inner">
+    <div class="ft-brand">
+      <img src="images/left-8.png" alt="爱西支教协会" class="ft-logo">
+      <div class="ft-slogan">
+        爱西支教协会 &nbsp;|&nbsp; WE ARE ALL THE SAME<br>
+        十八年来，爱西在祖国西部留下了一串串爱的脚印
+      </div>
+    </div>
+    <div class="ft-links">
+      <a href="apply.html">报名投递</a>
+      <a href="stories.html">支教现场</a>
+      <a href="status.html">查询进度</a>
+      <a href="#news">爱西动态</a>
+      <a href="#contact">联系我们</a>
+      <a href="privacy.html">隐私声明</a>
+      <a href="admin.html" style="opacity:.75;">领队入口</a>
+    </div>
+  </div>
+  <div class="ft-bottom">
+    华南理工大学 · 爱西支教协会，创立于 2008 年<span data-icp></span><br>
+    <!-- 用云开发默认二级域名不需要备案；若将来绑定自有域名，备案号填在这里 -->
+  </div>
+</footer>
+
+
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/home.js"></script>
+<script src="js/music.js"></script>
+<script src="js/beian.js"></script>
+</body>
+</html>

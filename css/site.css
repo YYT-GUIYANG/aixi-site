@@ -1,0 +1,353 @@
+/* ==========================================================================
+   爱西支教协会 · 共享样式层
+   index.html / apply.html / status.html / admin.html 四个页面共用这一份。
+   页面独有的版式（首屏转场、历年画卷等）留在各自 HTML 里内联。
+
+   设计令牌沿用官网原有配色：墨蓝 #2B2F4C、淡紫 #A8A8E0、书法字标 text-8.png。
+
+   一条硬规矩：任何「隐藏元素等动效来显示」的写法都必须写在 .has-anim 之下。
+   原来的首页把荣誉列表直接设成 opacity:0 再靠 GSAP 显示，CDN 一挂内容就永久不可见。
+   现在默认全部可见，只有确认 GSAP 可用（html.has-anim）才允许藏。
+   ========================================================================== */
+
+:root {
+  --ink: #2B2F4C;          /* 主色 墨蓝 */
+  --ink-2: #3b3b58;        /* 次级墨蓝，原站 contact-banner 用色 */
+  --ink-3: #23252F;        /* 近黑正文色 */
+  --lilac: #A8A8E0;        /* 辅色 淡紫 */
+  --lilac-dark: #8f8fd0;
+  --paper: #FFFFFF;
+  --paper-2: #F5F5F8;
+  --text: #333333;
+  --muted: #6E6E86;
+  --muted-2: #9A9AAE;
+  --line: #E3E3EC;
+  --ok: #1F7A54;
+  --warn: #9A6A00;
+  --err: #B3261E;
+  --radius: 10px;
+  --maxw: 1200px;
+  --font: 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--paper);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; }
+
+/* 系统层面要求减少动效时，等同于「没有动效」，与 GSAP 缺失走同一套降级 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+.container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 5vw; }
+
+/* 仅供读屏软件的文字 */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ===== 按钮 ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: none; border-radius: 8px; font-family: var(--font);
+  font-weight: bold; font-size: 1rem; line-height: 1.2; cursor: pointer;
+  padding: 11px 24px; letter-spacing: 1px;
+  transition: transform .2s ease, opacity .2s ease, background-color .2s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn:focus-visible { outline: 3px solid var(--lilac); outline-offset: 2px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; transform: none; }
+
+.btn-primary { background: var(--lilac); color: #111; }
+.btn-primary:hover { background: var(--lilac-dark); }
+.btn-ink { background: var(--ink); color: #fff; }
+.btn-white { background: #fff; color: #111; }
+.btn-ghost { background: transparent; color: inherit; border: 1.5px solid currentColor; }
+.btn-icon { width: 54px; height: 42px; padding: 0; }
+.btn-sm { padding: 7px 14px; font-size: .875rem; }
+
+/* ===== 导航栏 ===== */
+.navbar {
+  position: fixed; top: 0; left: 0; width: 100%;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 26px 5vw; z-index: 100; pointer-events: none;
+}
+.nav-left, .nav-right { pointer-events: auto; }
+.nav-left { display: flex; align-items: center; }
+.nav-logo { height: 46px; width: auto; object-fit: contain; transition: filter .3s ease; }
+.nav-right { display: flex; gap: 12px; align-items: center; }
+/* 深色底上把黑色字标反白。
+   light-text 由 IntersectionObserver 按「导航栏压在哪个段落上」设置；
+   force-light 留给首屏和画卷那两处背景色是被滚动进度动画出来的段落，
+   分成两个 class 是为了让两套判定互不覆盖。 */
+.navbar.light-text .nav-logo,
+.navbar.force-light .nav-logo { filter: brightness(0) invert(1); }
+
+@media (max-width: 640px) {
+  .navbar { padding: 16px 5vw; }
+  .nav-logo { height: 36px; }
+  .nav-right { gap: 8px; }
+  .btn { padding: 9px 16px; font-size: .9rem; letter-spacing: 0; }
+  .btn-icon { width: 44px; height: 38px; }
+  /* 手机上导航挤不下三个，CONTACT 让位给「报名」 */
+  .nav-right .nav-contact { display: none; }
+}
+
+/* ===== 全屏菜单 =====
+   开合完全由 .is-open 这个 class + CSS transition 驱动，不依赖任何 JS 库。
+   GSAP 在时只额外做链接的错位入场。 */
+.menu-overlay {
+  position: fixed; inset: 0; z-index: 90;
+  background: var(--ink); color: #fff;
+  display: flex; padding: 120px 8vw 50px;
+  transform: translateY(-100%);
+  visibility: hidden; opacity: 0;
+  transition: transform .7s cubic-bezier(.86,0,.07,1), opacity .4s ease, visibility .7s;
+  overflow-y: auto;
+}
+.menu-overlay.is-open { transform: translateY(0); visibility: visible; opacity: 1; }
+
+.menu-left-images { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-right: 5vw; }
+.menu-img-link {
+  display: block; border-radius: 8px; overflow: hidden; min-height: 120px;
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.menu-img-link:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,.3); }
+.menu-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.menu-right-links {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  gap: 3.4vh; align-items: flex-start; padding-left: 10vw;
+}
+.menu-link {
+  font-size: clamp(1.8rem, 4vw, 3.6rem); font-weight: bold; letter-spacing: 4px;
+  color: rgba(255,255,255,.6);
+  transition: color .3s ease, transform .3s ease;
+}
+.menu-link:hover, .menu-link:focus-visible { color: #fff; transform: translateX(10px); }
+.menu-link.is-cta { color: var(--lilac); }
+
+.menu-footer-tag {
+  position: absolute; bottom: 34px; right: 8vw;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center; opacity: .6;
+}
+.tag-icon { height: 34px; width: auto; object-fit: contain; filter: brightness(0) invert(1); }
+.tag-text-small { font-size: .75rem; letter-spacing: 1px; line-height: 1.4; }
+
+@media (max-width: 860px) {
+  .menu-overlay { flex-direction: column; padding: 96px 8vw 40px; }
+  .menu-left-images { display: none; }      /* 手机上四张缩略图挤没意义，直接省掉 */
+  .menu-right-links { padding-left: 0; gap: 2.6vh; }
+  .menu-footer-tag { position: static; align-items: flex-start; margin-top: 40px; right: auto; }
+}
+
+/* ===== 通栏标题 ===== */
+.section-head { text-align: center; margin-bottom: 46px; }
+.section-head .eyebrow {
+  font-size: .8rem; letter-spacing: 3px; color: var(--lilac); text-transform: uppercase;
+  margin: 0 0 12px;
+}
+.section-head h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0; letter-spacing: 2px; }
+.section-head .sub { margin: 10px 0 0; color: var(--muted); font-size: 1rem; }
+
+/* ===== 数字成果 ===== */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 28px; }
+.stat { text-align: center; }
+/* 数字区用固定高度并让内容底边对齐。
+   否则一旦某一格字号不同（例如「数千」比数字小一档），它的行高就更短，
+   下面那行说明文字会整体上移，看起来像这一格单独「变高」了。
+   固定高度 + flex-end 之后，五格的数字底边和说明文字都在同一条线上。 */
+.stat .num {
+  font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 900; line-height: 1;
+  letter-spacing: 1px; color: var(--ink);
+  height: clamp(2rem, 5vw, 3.4rem);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.stat .num .unit { font-size: .4em; font-weight: bold; margin-left: 4px; letter-spacing: 0; }
+/* 用汉字而不是数字的那一格（例如「数千」）：等宽汉字在同字号下视觉重量远大于阿拉伯数字，
+   压一档才能和整排数字看起来一样大。高度仍由上面那条统一控制。 */
+.stat .num.is-word { font-size: clamp(1.6rem, 3.6vw, 2.5rem); }
+.stat .cap { margin-top: 12px; font-size: .95rem; color: var(--muted); letter-spacing: 1px; }
+/* 深色底上的数字成果 */
+.on-ink .stat .num { color: #fff; }
+.on-ink .stat .cap { color: rgba(255,255,255,.7); }
+
+/* 待用户核对的占位数字：必须显眼到不可能被误发上线 */
+.todo {
+  background: #FFF3CD; color: #7A5B00; border-bottom: 2px dashed #C9A227;
+  padding: 0 4px; font-style: normal;
+}
+.on-ink .todo { background: #6B5A1F; color: #FFE9A6; border-bottom-color: #FFD24D; }
+
+/* ===== 卡片（公众号动态） ===== */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+.card {
+  display: flex; flex-direction: column; background: #fff;
+  border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(43,47,76,.13); }
+/* 比例刻意用 900/383（≈2.35:1）而不是 16/9：那是微信公众号封面图的标准尺寸。
+   按 16/9 裁的话，object-fit:cover 会从左右各切掉 12%，
+   而公众号封面的标题文字通常就压在左右两端，一裁就切没了。 */
+.card-cover {
+  width: 100%; aspect-ratio: 900 / 383; object-fit: cover;
+  background: var(--paper-2); display: block;
+}
+.card-body { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.card-date { font-size: .78rem; color: var(--muted-2); letter-spacing: 1px; }
+.card-title { margin: 0; font-size: 1.02rem; line-height: 1.55; color: var(--ink-3); font-weight: bold; }
+.card-more { margin-top: auto; font-size: .85rem; color: var(--ink); font-weight: bold; }
+
+/* ===== 表单 ===== */
+.form-card {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  padding: 30px; max-width: 720px; margin: 0 auto;
+}
+.field { margin-bottom: 22px; }
+.field > label, .field > .label {
+  display: block; margin-bottom: 7px; font-size: .92rem; font-weight: bold; color: var(--ink-3);
+}
+.field .req { color: var(--err); margin-left: 3px; }
+.field .help { margin: 6px 0 0; font-size: .82rem; color: var(--muted); line-height: 1.6; }
+.input, .textarea, .select {
+  width: 100%; font-family: var(--font); font-size: 1rem; color: var(--ink-3);
+  padding: 11px 13px; border: 1.5px solid var(--line); border-radius: 8px;
+  background: #fff; transition: border-color .2s ease, box-shadow .2s ease;
+}
+.input:focus, .textarea:focus, .select:focus {
+  outline: none; border-color: var(--lilac); box-shadow: 0 0 0 3px rgba(168,168,224,.28);
+}
+.textarea { min-height: 120px; resize: vertical; line-height: 1.7; }
+.field.has-error .input, .field.has-error .textarea, .field.has-error .select { border-color: var(--err); }
+.field .err-msg { display: none; margin: 6px 0 0; font-size: .82rem; color: var(--err); }
+.field.has-error .err-msg { display: block; }
+
+.radio-row, .check-row { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+.radio-row label, .check-row label {
+  display: inline-flex; align-items: center; gap: 7px; font-size: .95rem; cursor: pointer;
+}
+
+/* 文件上传 */
+.file-drop {
+  border: 2px dashed var(--line); border-radius: 10px; padding: 26px 20px;
+  text-align: center; cursor: pointer; transition: border-color .2s ease, background-color .2s ease;
+}
+.file-drop:hover, .file-drop.is-over { border-color: var(--lilac); background: #FAFAFF; }
+.file-drop .fd-main { font-weight: bold; color: var(--ink); }
+.file-drop .fd-sub { margin-top: 6px; font-size: .82rem; color: var(--muted); }
+.file-pick { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.file-chosen {
+  display: none; margin-top: 12px; padding: 11px 13px; border-radius: 8px;
+  background: var(--paper-2); font-size: .9rem;
+  align-items: center; justify-content: space-between; gap: 12px;
+}
+.file-chosen.is-shown { display: flex; }
+.file-chosen .fc-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.progress { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 10px; display: none; }
+.progress.is-shown { display: block; }
+.progress > i { display: block; height: 100%; width: 0; background: var(--lilac); transition: width .2s ease; }
+
+/* ===== 提示条 ===== */
+.notice {
+  border-radius: 10px; padding: 14px 16px; font-size: .9rem; line-height: 1.7;
+  border: 1px solid; margin-bottom: 22px;
+}
+.notice-info { background: #F2F2FA; border-color: #D6D6EE; color: #3A3A5C; }
+.notice-warn { background: #FFF8E5; border-color: #F0DDA8; color: var(--warn); }
+.notice-err  { background: #FDECEA; border-color: #F5C3BE; color: var(--err); }
+.notice-ok   { background: #EAF6F0; border-color: #B8DFCB; color: var(--ok); }
+.notice strong { font-weight: bold; }
+
+/* ===== 页脚 ===== */
+.site-footer { background: var(--ink); color: rgba(255,255,255,.72); padding: 54px 5vw 34px; }
+.site-footer .ft-inner {
+  max-width: var(--maxw); margin: 0 auto;
+  display: flex; flex-wrap: wrap; gap: 32px; justify-content: space-between;
+}
+.site-footer .ft-brand { display: flex; flex-direction: column; gap: 12px; }
+.site-footer .ft-logo { height: 40px; width: auto; filter: brightness(0) invert(1); align-self: flex-start; }
+.site-footer .ft-slogan { font-size: .85rem; letter-spacing: 2px; line-height: 1.8; }
+.site-footer .ft-links { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: flex-start; }
+.site-footer .ft-links a { font-size: .9rem; }
+.site-footer .ft-links a:hover { color: var(--lilac); }
+.site-footer .ft-bottom {
+  max-width: var(--maxw); margin: 30px auto 0; padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,.14);
+  font-size: .78rem; color: rgba(255,255,255,.5); line-height: 1.9;
+}
+
+/* ==========================================================================
+   降级：html 上没有 .has-anim 时（GSAP 未加载 / 加载失败 / 用户要求减少动效），
+   一切都必须是可读的静态页面。下面这些覆盖是安全网，不是可选项。
+   ========================================================================== */
+html:not(.has-anim) [data-anim] { opacity: 1 !important; transform: none !important; }
+
+/* 反过来，「入场前隐藏」的初始态写在 CSS 里而不是靠 gsap.set()：
+   一是避免内容先显示再被藏起来那一下闪烁，二是这样初始态和降级态由同一处控制。 */
+html.has-anim [data-anim="fade-up"] { opacity: 0; transform: translateY(30px); }
+html.has-anim [data-anim="fade"]    { opacity: 0; }
+
+/* ==========================================================================
+   背景音乐按钮（js/music.js 动态插入，后台没配歌时根本不会出现）
+   ========================================================================== */
+.music-btn {
+  position: fixed; right: 18px; bottom: 18px; z-index: 40;
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 16px 9px 13px; border-radius: 999px; cursor: pointer;
+  background: rgba(43, 47, 76, .88); color: #fff;
+  border: 1px solid rgba(255, 255, 255, .22);
+  font-size: .82rem; letter-spacing: .5px; font-family: inherit;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .18);
+  transition: background-color .2s ease, transform .2s ease;
+}
+.music-btn:hover { background: rgba(43, 47, 76, .98); transform: translateY(-1px); }
+.music-btn:focus-visible { outline: 3px solid var(--lilac); outline-offset: 3px; }
+.music-btn .mt { opacity: .9; }
+
+/* 四根竖条。停着的时候是一条静止的横线，放着的时候才跳 ——
+   一眼就能看出现在是响着还是没响，不用去猜那个图标是什么意思。 */
+.music-btn .mi { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+.music-btn .mi i {
+  display: block; width: 3px; height: 3px; border-radius: 1px;
+  background: var(--lilac);
+}
+.music-btn.is-on .mi i { animation: mbar .9s ease-in-out infinite; }
+.music-btn.is-on .mi i:nth-child(2) { animation-delay: .18s; }
+.music-btn.is-on .mi i:nth-child(3) { animation-delay: .36s; }
+.music-btn.is-on .mi i:nth-child(4) { animation-delay: .54s; }
+@keyframes mbar {
+  0%, 100% { height: 3px; }
+  50% { height: 14px; }
+}
+/* 系统设了「减少动态效果」就别跳了，只用颜色区分 */
+@media (prefers-reduced-motion: reduce) {
+  .music-btn.is-on .mi i { animation: none; height: 10px; }
+}
+@media (max-width: 640px) {
+  .music-btn { right: 12px; bottom: 12px; padding: 8px 13px 8px 11px; }
+  .music-btn .mt { display: none; }   /* 手机上只留图标，别挡住内容 */
+}
+
+/* 简历模板下载：贴在上传框上方（js/apply.js 动态插入，后台没配就不出现） */
+.tpl-row {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 14px 16px; margin-bottom: 12px;
+  background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px;
+}
+.tpl-row .tpl-tip { flex: 1; min-width: 180px; font-size: .86rem; color: var(--muted); line-height: 1.7; }

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>支教现场 · 爱西支教协会</title>
+<meta name="description" content="爱西支教协会 2025、2026 两届支教的现场照片：出发的火车、清晨的升旗、一个班的合影、结营那天">
+<meta name="theme-color" content="#2B2F4C">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<meta property="og:title" content="支教现场 · 爱西支教协会">
+<meta property="og:description" content="2025、2026 两届支教的现场照片。">
+<meta property="og:image" content="images/stories/26-banner.jpg">
+<link rel="stylesheet" href="css/site.css">
+<style>
+  .sub-head {
+    background: var(--ink); color: #fff; padding: 22px 5vw;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .sub-head .logo { height: 38px; filter: brightness(0) invert(1); }
+  .sub-head .links { display: flex; gap: 10px; align-items: center; }
+
+  /* 头图：这张里有会旗、有锦旗，一眼能说明这是什么组织在做什么事 */
+  .hero {
+    position: relative; background: var(--ink);
+    min-height: 46vh; display: flex; align-items: flex-end;
+    overflow: hidden;
+  }
+  .hero img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: .55;
+  }
+  .hero .inner {
+    position: relative; z-index: 1; color: #fff;
+    padding: 60px 5vw 40px; max-width: var(--maxw); margin: 0 auto; width: 100%;
+  }
+  .hero .eyebrow { font-size: .76rem; letter-spacing: 4px; color: var(--lilac); margin: 0 0 12px; }
+  .hero h1 { margin: 0 0 14px; font-size: clamp(1.9rem, 5.5vw, 3.1rem); letter-spacing: 4px; }
+  .hero p { margin: 0; max-width: 46ch; line-height: 1.9; font-size: .96rem; opacity: .92; }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 5vw; }
+
+  .year { padding: 72px 0; }
+  .year:not(:last-child) { border-bottom: 1px solid var(--line); }
+  .year-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  .year-head h2 {
+    margin: 0; font-size: clamp(1.6rem, 4vw, 2.2rem); color: var(--ink);
+    letter-spacing: 2px; font-variant-numeric: tabular-nums;
+  }
+  .year-head .tag {
+    font-size: .74rem; letter-spacing: 2px; color: var(--lilac);
+    font-weight: bold; text-transform: uppercase;
+  }
+  .year .lead { color: var(--muted); margin: 0 0 34px; line-height: 1.9; max-width: 54ch; }
+
+  /* 照片墙：固定行高的格子，说明压在图上。
+     一开始做的是「图 + 下方说明」，结果占两格的图比同排单格的高，
+     每一行都对不齐、右边留一块洞。行高固定之后，占几格就是几格宽，
+     高度永远一致，整面墙才立得住。dense 让偶尔的空位自动被后面的图补上。 */
+  .shots {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 230px; grid-auto-flow: dense; gap: 14px;
+  }
+  .shot { position: relative; margin: 0; border-radius: 12px; overflow: hidden; background: var(--paper-2); }
+  .shot a { display: block; width: 100%; height: 100%; }
+  .shot img {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+    transition: transform .5s ease;
+  }
+  .shot a:hover img { transform: scale(1.04); }
+  .shot a:focus-visible { outline: 3px solid var(--lilac); outline-offset: -3px; }
+  .shot figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 1;
+    padding: 34px 14px 12px; color: #fff; font-size: .86rem; line-height: 1.6;
+    background: linear-gradient(to bottom, rgba(20,21,36,0), rgba(20,21,36,.86));
+    pointer-events: none;
+  }
+  .shot.w2 { grid-column: span 2; }
+  .shot.h2 { grid-row: span 2; }
+
+  @media (max-width: 1000px) {
+    .shots { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 200px; }
+  }
+  /* 手机上一律一张一行：横向再切格子，人脸就只剩半张了 */
+  @media (max-width: 640px) {
+    .shots { grid-template-columns: 1fr; grid-auto-rows: auto; }
+    .shot.w2, .shot.h2 { grid-column: auto; grid-row: auto; }
+    .shot img { aspect-ratio: 4 / 3; height: auto; }
+    .shot.tallish img { aspect-ratio: 3 / 4; }
+  }
+
+  .tail { padding: 60px 0 90px; text-align: center; }
+  .tail p { color: var(--muted); line-height: 1.9; margin: 0 0 22px; }
+
+  /* 点开看大图。没有 JS 时链接照样能用（直接打开大图），所以不算硬依赖。 */
+  .lb {
+    position: fixed; inset: 0; z-index: 80; background: rgba(20,21,36,.93);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .lb[hidden] { display: none; }
+  .lb img { max-width: 100%; max-height: 78vh; object-fit: contain; border-radius: 6px; }
+  .lb .cap { color: #fff; margin-top: 18px; font-size: .92rem; text-align: center; max-width: 60ch; }
+  .lb .cap .n { color: var(--lilac); margin-left: 10px; font-variant-numeric: tabular-nums; }
+  .lb button {
+    position: absolute; background: rgba(255,255,255,.12); color: #fff;
+    border: 1px solid rgba(255,255,255,.3); border-radius: 999px; cursor: pointer;
+    width: 46px; height: 46px; font-size: 1.2rem; line-height: 1;
+  }
+  .lb .x { top: 18px; right: 18px; }
+  .lb .prev { left: 18px; top: 50%; transform: translateY(-50%); }
+  .lb .next { right: 18px; top: 50%; transform: translateY(-50%); }
+  @media (max-width: 640px) {
+    .lb .prev { left: 10px; } .lb .next { right: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="sub-head">
+  <a href="index.html" aria-label="返回首页">
+    <img src="images/left-8.png" alt="爱西支教协会" class="logo">
+  </a>
+  <div class="links">
+    <a href="apply.html" class="btn btn-ghost btn-sm">报名</a>
+    <a href="index.html" class="btn btn-white btn-sm">返回首页</a>
+  </div>
+</header>
+
+<section class="hero">
+  <img src="images/stories/26-banner.jpg" alt="队员与校长在校门前合影，手持爱西会旗与学校赠送的锦旗">
+  <div class="inner">
+    <p class="eyebrow">FROM THE FIELD</p>
+    <h1>支教现场</h1>
+    <p>往届爱西队员从出发到结营，留在照片里的夏日记忆。</p>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <section class="year">
+    <div class="year-head">
+      <h2>2026</h2>
+    </div>
+    <p class="lead">河南商丘 · 睢县尤吉屯乡中心小学</p>
+
+    <div class="shots">
+      <figure class="shot w2 h2">
+        <a href="images/stories/26-train@2x.jpg" data-cap="广州出发 · 赴豫播撒星光">
+          <img src="images/stories/26-train.jpg" loading="lazy" width="900" height="675"
+               alt="队员在火车硬卧车厢里合影">
+        </a>
+        <figcaption>广州出发 · 赴豫播撒星光</figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="images/stories/26-arrive@2x.jpg" data-cap="商丘！我们如约而至">
+          <img src="images/stories/26-arrive.jpg" loading="lazy" width="900" height="675"
+               alt="队员在火车站广场上合影，身边还堆着行李">
+        </a>
+        <figcaption>商丘！我们如约而至</figcaption>
+      </figure>
+
+      <figure class="shot h2 tallish">
+        <a href="images/stories/26-flag@2x.jpg" data-cap="尤吉屯乡 · 在这里一同升起国旗">
+          <img src="images/stories/26-flag.jpg" loading="lazy" width="900" height="1350"
+               alt="两名队员在操场上升国旗">
+        </a>
+        <figcaption>尤吉屯乡 · 在这里一同升起国旗</figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="images/stories/26-class@2x.jpg" data-cap="与孩子们的夏日回忆">
+          <img src="images/stories/26-class.jpg" loading="lazy" width="900" height="475"
+               alt="教室里一个班的孩子与支教老师合影">
+        </a>
+        <figcaption>与孩子们的夏日回忆</figcaption>
+      </figure>
+
+      <figure class="shot w2">
+        <a href="images/stories/26-meal@2x.jpg" data-cap="一起吃过的饭后来都变成了很想念的日子">
+          <img src="images/stories/26-meal.jpg" loading="lazy" width="900" height="507"
+               alt="队员们在教室里围坐吃饭">
+        </a>
+        <figcaption>一起吃过的饭后来都变成了很想念的日子</figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="images/stories/26-birthday@2x.jpg" data-cap="我想大声对你说：">
+          <img src="images/stories/26-birthday.jpg" loading="lazy" width="900" height="675"
+               alt="队员们举着会旗为同伴庆祝生日">
+        </a>
+        <figcaption>我想大声对你说：</figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="images/stories/26-birthday2@2x.jpg" data-cap="生日快乐">
+          <img src="images/stories/26-birthday2.jpg" loading="lazy" width="900" height="675"
+               alt="生日当晚的另一张合影">
+        </a>
+        <figcaption>生日快乐</figcaption>
+      </figure>
+
+      <figure class="shot w2 h2">
+        <a href="images/stories/26-leaders@2x.jpg" data-cap="新征途，但是少了一个洋葱">
+          <img src="images/stories/26-leaders.jpg" loading="lazy" width="900" height="675"
+               alt="四位领队在教学楼走廊合影">
+        </a>
+        <figcaption>新征途，但是少了一个洋葱</figcaption>
+      </figure>
+
+      <figure class="shot w2 h2">
+        <a href="images/stories/26-banner@2x.jpg" data-cap="结束那天，学校送来锦旗：青春筑梦，情系乡村">
+          <img src="images/stories/26-banner.jpg" loading="lazy" width="900" height="675"
+               alt="队员与校长在校门前合影，手持爱西会旗与学校赠送的锦旗">
+        </a>
+        <figcaption>结束那天，学校送来锦旗：青春筑梦，情系乡村</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="year">
+    <div class="year-head">
+      <h2>2025</h2>
+    </div>
+    <p class="lead">贵州铜仁 · 万山区茶店三十四小学</p>
+
+    <div class="shots">
+      <figure class="shot w2 h2">
+        <a href="images/stories/25-class-a@2x.jpg" data-cap="铜星二班">
+          <img src="images/stories/25-class-a.jpg" loading="lazy" width="900" height="600"
+               alt="铜星二班的班级合影">
+        </a>
+        <figcaption>铜星二班</figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="images/stories/25-class1@2x.jpg" data-cap="向阳一班">
+          <img src="images/stories/25-class1.jpg" loading="lazy" width="900" height="600"
+               alt="一班的班级合影">
+        </a>
+        <figcaption>向阳一班</figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="images/stories/25-class3@2x.jpg" data-cap="翠芽三班">
+          <img src="images/stories/25-class3.jpg" loading="lazy" width="900" height="600"
+               alt="三班的班级合影">
+        </a>
+        <figcaption>翠芽三班</figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="images/stories/25-class-b@2x.jpg" data-cap="我和我骄傲的倔强">
+          <img src="images/stories/25-class-b.jpg" loading="lazy" width="900" height="675"
+               alt="另一个班的班级合影">
+        </a>
+        <figcaption>我和我骄傲的倔强</figcaption>
+      </figure>
+
+      <figure class="shot w2 h2">
+        <a href="images/stories/25-closing@2x.jpg" data-cap="结营表演 · 聪明勇敢有力气 我真的羡慕我自己">
+          <img src="images/stories/25-closing.jpg" loading="lazy" width="900" height="600"
+               alt="结营那天，队员和孩子们在操场上比心">
+        </a>
+        <figcaption>结营表演 · 聪明勇敢有力气 我真的羡慕我自己</figcaption>
+      </figure>
+
+      <figure class="shot w2 h2">
+        <a href="images/stories/25-perform@2x.jpg" data-cap="结营表演 · 希望我们的第一次能给孩子们留下更快乐的回忆">
+          <img src="images/stories/25-perform.jpg" loading="lazy" width="900" height="580"
+               alt="队员们在操场上列队表演">
+        </a>
+        <figcaption>结营表演 · 希望我们的第一次能给孩子们留下更快乐的回忆</figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="images/stories/25-team@2x.jpg" data-cap="我们是彼此互补的拼图">
+          <img src="images/stories/25-team.jpg" loading="lazy" width="900" height="675"
+               alt="队员们把工作牌拼成一整块拼图">
+        </a>
+        <figcaption>我们是彼此互补的拼图</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="tail">
+    <p>每年三月招新。留下邮箱，开放时我们通知你。</p>
+    <a href="apply.html" class="btn btn-primary">去报名页看看</a>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="ft-inner">
+    <div class="ft-brand">
+      <img src="images/left-8.png" alt="爱西支教协会" class="ft-logo">
+      <div class="ft-slogan">
+        爱西支教协会 &nbsp;|&nbsp; WE ARE ALL THE SAME<br>
+        十八年来，爱西在祖国西部留下了一串串爱的脚印
+      </div>
+    </div>
+    <div class="ft-links">
+      <a href="index.html">回到首页</a>
+      <a href="stories.html">支教现场</a>
+      <a href="apply.html">报名投递</a>
+      <a href="status.html">查询进度</a>
+      <a href="privacy.html">隐私声明</a>
+    </div>
+  </div>
+  <div class="ft-bottom">华南理工大学 · 爱西支教协会，创立于 2008 年<span data-icp></span></div>
+</footer>
+
+<!-- 看大图。没有 JS 也能用：上面每张图本来就是指向大图的普通链接。 -->
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="查看大图">
+  <button class="x" type="button" id="lbClose" aria-label="关闭">✕</button>
+  <button class="prev" type="button" id="lbPrev" aria-label="上一张">‹</button>
+  <button class="next" type="button" id="lbNext" aria-label="下一张">›</button>
+  <img id="lbImg" alt="">
+  <div class="cap"><span id="lbCap"></span><span class="n" id="lbNum"></span></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var links = Array.prototype.slice.call(document.querySelectorAll(".shot a"));
+  if (!links.length) return;
+
+  var lb = document.getElementById("lb");
+  var img = document.getElementById("lbImg");
+  var cap = document.getElementById("lbCap");
+  var num = document.getElementById("lbNum");
+  var idx = 0;
+
+  function show(i) {
+    idx = (i + links.length) % links.length;
+    var a = links[idx];
+    img.src = a.getAttribute("href");
+    img.alt = a.querySelector("img").alt;
+    cap.textContent = a.getAttribute("data-cap") || "";
+    num.textContent = (idx + 1) + " / " + links.length;
+    lb.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function close() {
+    lb.hidden = true;
+    img.src = "";                 // 放掉大图，别让它一直占着内存
+    document.body.style.overflow = "";
+    links[idx].focus();
+  }
+
+  links.forEach(function (a, i) {
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      show(i);
+    });
+  });
+
+  document.getElementById("lbClose").addEventListener("click", close);
+  document.getElementById("lbPrev").addEventListener("click", function () { show(idx - 1); });
+  document.getElementById("lbNext").addEventListener("click", function () { show(idx + 1); });
+  lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
+  document.addEventListener("keydown", function (e) {
+    if (lb.hidden) return;
+    if (e.key === "Escape") close();
+    else if (e.key === "ArrowLeft") show(idx - 1);
+    else if (e.key === "ArrowRight") show(idx + 1);
+  });
+})();
+</script>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/music.js"></script>
+<script src="js/beian.js"></script>
+</body>
+</html>

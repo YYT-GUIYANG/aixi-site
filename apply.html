@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>报名投递 · 爱西支教协会</title>
+<meta name="description" content="爱西支教协会招新报名与周年庆报名入口。填写信息、投递简历，提交后可凭邮箱与凭证码查询进度。">
+<meta name="theme-color" content="#2B2F4C">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="css/site.css">
+<style>
+  /* 子页头部：不做全屏菜单那一套，只留必要的返回与查询入口 */
+  .sub-head {
+    background: var(--ink); color: #fff; padding: 22px 5vw;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .sub-head .logo { height: 38px; filter: brightness(0) invert(1); }
+  .sub-head .links { display: flex; gap: 10px; align-items: center; }
+
+  .page-hero { background: var(--ink); color: #fff; padding: 40px 5vw 70px; text-align: center; }
+  .page-hero .eyebrow { font-size: .78rem; letter-spacing: 4px; color: var(--lilac); margin: 0 0 14px; }
+  .page-hero h1 { margin: 0; font-size: clamp(1.9rem, 5vw, 2.9rem); letter-spacing: 3px; }
+  .page-hero .state {
+    display: inline-block; margin-top: 22px; padding: 8px 18px; border-radius: 999px;
+    font-size: .88rem; letter-spacing: 1px; background: rgba(255,255,255,.12);
+  }
+  .page-hero .state.is-open { background: rgba(168,224,190,.2); color: #CFF3DE; }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 5vw; }
+  .block { padding: 72px 0; }
+  .block:not(:last-child) { border-bottom: 1px solid var(--line); }
+  .block h2 { font-size: clamp(1.4rem, 3.4vw, 1.9rem); margin: 0 0 10px; color: var(--ink); letter-spacing: 1px; }
+  .block .lead { color: var(--muted); margin: 0 0 30px; font-size: .96rem; letter-spacing: 1px; }
+  .block p { line-height: 1.9; }
+
+  /* 选拔流程：按阶段分组。九个环节排成一长条会很笨重，
+     分成「选拔 / 培养 / 出发」三段之后既完整又好读。 */
+  .phase { position: relative; padding: 0 0 34px 30px; border-left: 2px solid var(--line); margin-left: 6px; }
+  .phase:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .phase::before {
+    content: ""; position: absolute; left: -7px; top: 6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--ink); box-shadow: 0 0 0 4px #fff;
+  }
+  .phase-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .phase-head h3 { margin: 0; font-size: 1.12rem; color: var(--ink); letter-spacing: 1px; }
+  .phase-head .pm {
+    font-size: .74rem; letter-spacing: 2px; color: var(--lilac);
+    font-weight: bold; text-transform: uppercase;
+  }
+  .phase-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 15px; }
+  .phase-steps li { display: grid; grid-template-columns: 28px 1fr; gap: 13px; align-items: start; }
+  .phase-steps .n {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--paper-2); border: 1px solid var(--line); color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, Menlo, monospace; font-size: .76rem; font-weight: bold;
+    font-variant-numeric: tabular-nums;
+  }
+  .phase-steps h4 { margin: 3px 0 5px; font-size: 1rem; color: var(--ink-3); letter-spacing: .3px; }
+  .phase-steps p { margin: 0; font-size: .92rem; color: var(--muted); line-height: 1.8; }
+  .phase-steps .when { color: var(--ink); font-weight: bold; font-size: .88rem; margin-left: 6px; }
+
+  /* 我们看重什么 */
+  .traits { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+  .trait { background: var(--paper-2); border-radius: var(--radius); padding: 22px; }
+  .trait h3 { margin: 0 0 8px; font-size: 1rem; color: var(--ink); }
+  .trait p { margin: 0; font-size: .9rem; color: var(--muted); line-height: 1.8; }
+
+  /* FAQ：原生 details，不用 JS */
+  .faq details {
+    border-bottom: 1px solid var(--line); padding: 16px 0;
+  }
+  .faq summary {
+    cursor: pointer; font-weight: bold; color: var(--ink-3); font-size: 1rem;
+    list-style: none; display: flex; justify-content: space-between; gap: 14px;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; color: var(--lilac); font-size: 1.3rem; line-height: 1; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq details p { margin: 12px 0 0; font-size: .94rem; color: var(--muted); line-height: 1.9; }
+
+  .form-block { background: var(--paper-2); padding: 72px 5vw 90px; }
+
+  /* 提交成功后的凭证码 */
+  .ticket-box {
+    text-align: center; background: #fff; border: 2px dashed var(--lilac);
+    border-radius: 12px; padding: 26px; margin: 24px 0;
+  }
+  .ticket-box .code {
+    font-size: 2rem; font-weight: 900; letter-spacing: 6px; color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin: 10px 0;
+  }
+</style>
+</head>
+<body>
+
+<header class="sub-head">
+  <a href="index.html" aria-label="返回首页">
+    <img src="images/left-8.png" alt="爱西支教协会" class="logo">
+  </a>
+  <div class="links">
+    <a href="status.html" class="btn btn-ghost btn-sm">查询进度</a>
+    <a href="index.html" class="btn btn-white btn-sm">返回首页</a>
+  </div>
+</header>
+
+<section class="page-hero">
+  <p class="eyebrow" id="pageEyebrow">RECRUITMENT</p>
+  <h1 id="pageTitle">队员招新报名</h1>
+  <div class="state" id="pageState">正在读取开放状态…</div>
+</section>
+
+<div class="wrap">
+
+  <!-- ============ 招新详情：只在招新模式显示 ============ -->
+  <div id="recruitInfo">
+
+    <section class="block">
+      <h2>关于爱西</h2>
+      <p class="lead">WHO WE ARE</p>
+      <p>爱西支教协会创立于 2008 年，由华南理工大学的 3 名贵州籍大学生发起，2013 年开始独立运营支教活动。十八年来，从织金、纳雍、金沙、闽中，到松桃、播泉、丹寨，爱西在祖国西部留下了一串串爱的脚印；2026 年，爱西的课堂开到了河南。</p>
+      <p>2018 年起，爱西采取“主题+”的课程形式，专注于学生各项素质的发展；2022 年进一步完善了兴趣课机制。我们不是去把知识灌给孩子，而是希望在那十几天里，让他们看见更大一点的世界。</p>
+    </section>
+
+    <section class="block">
+      <h2>我们在找什么样的人</h2>
+      <p class="lead">WHAT WE LOOK FOR</p>
+      <div class="traits">
+        <div class="trait">
+          <h3>时间可支配</h3>
+          <p>备课自春季开始，持续约一个学期；暑期需全程参与在支教地的活动。这是最实际的条件。</p>
+        </div>
+        <div class="trait">
+          <h3>无需教学经验</h3>
+          <p>课程设计、课堂管理与安全规范由一培、二培统一培训，从零开始学。此前没有教过课不影响报名。</p>
+        </div>
+        <div class="trait">
+          <h3>能完成课程准备</h3>
+          <p>每门课需经过设计、试讲与多轮修改，通过后才会带进课堂。</p>
+        </div>
+        <div class="trait">
+          <h3>能配合团队</h3>
+          <p>支教以团队方式进行，涉及分工、排课与临时调整，需要与队友协商配合。</p>
+        </div>
+        <div class="trait">
+          <h3>面对学生有耐心</h3>
+          <p>授课对象是支教地的中小学生，课堂状态和注意力都需要引导。</p>
+        </div>
+        <div class="trait">
+          <h3>遵守统一规范</h3>
+          <p>支教期间需遵守作息、安全与行为规范，服从队伍的统一安排。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>选拔流程</h2>
+      <p class="lead">SELECTION</p>
+      <div class="phase">
+        <div class="phase-head"><h3>选拔</h3><span class="pm">3 — 4 月</span></div>
+        <ol class="phase-steps">
+          <li><span class="n">1</span><div>
+            <h4>报名投递<span class="when">3 月初</span></h4>
+            <p>在本页填写报名信息并投递简历。</p>
+          </div></li>
+          <li><span class="n">2</span><div>
+            <h4>简历初筛</h4>
+            <p>报名结束后我们先看一轮简历，通过的同学会收到面试通知邮件。</p>
+          </div></li>
+          <li><span class="n">3</span><div>
+            <h4>一面 · 车轮面<span class="when">3 月末</span></h4>
+            <p>一对一轮换面谈，由多位领队分别面谈。</p>
+          </div></li>
+          <li><span class="n">4</span><div>
+            <h4>线上作业 · 提交</h4>
+            <p>一面后布置，围绕支教主题提交书面思考。作业内容与提交邮箱、截止时间会在通知邮件里写明。</p>
+          </div></li>
+          <li><span class="n">5</span><div>
+            <h4>线上作业 · 结果</h4>
+            <p>作业纳入最终录取的考察范围。是否通过会另行通知，通过的同学进入二面。</p>
+          </div></li>
+          <li><span class="n">6</span><div>
+            <h4>二面 · 群面<span class="when">4 月中旬</span></h4>
+            <p>小组形式，考察沟通与协作。</p>
+          </div></li>
+        </ol>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head"><h3>培养</h3><span class="pm">5 — 6 月</span></div>
+        <ol class="phase-steps">
+          <li><span class="n">7</span><div>
+            <h4>破冰<span class="when">5 月</span></h4>
+            <p>新队员第一次集中见面。</p>
+          </div></li>
+          <li><span class="n">8</span><div>
+            <h4>一培</h4>
+            <p>第一轮集中培训，内容为课程设计与课堂管理。</p>
+          </div></li>
+          <li><span class="n">9</span><div>
+            <h4>二培</h4>
+            <p>第二轮培训，以试讲与课程修改为主。</p>
+          </div></li>
+        </ol>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head"><h3>出发</h3><span class="pm">7 月</span></div>
+        <ol class="phase-steps">
+          <li><span class="n">10</span><div>
+            <h4>出发前总会议<span class="when">7 月</span></h4>
+            <p>全员会议，确认分工、行程与安全规范。</p>
+          </div></li>
+          <li><span class="n">11</span><div>
+            <h4>启程</h4>
+            <p>按计划前往支教地。</p>
+          </div></li>
+        </ol>
+      </div>
+
+      <p style="margin-top:8px;font-size:.9rem;color:var(--muted-2);line-height:1.9;">
+        备课自春季持续到出发前，累计约一个学期。各环节的具体时间以当年通知为准。
+      </p>
+    </section>
+
+    <section class="block faq">
+      <h2>常见问题</h2>
+      <p class="lead">FAQ</p>
+
+      <details>
+        <summary>需要有支教经验吗？</summary>
+        <p>不需要。爱西每年都会从零开始培养新队员，一培和二培就是为此存在的。我们更在意你愿不愿意投入，而不是你已经会什么。</p>
+      </details>
+
+      <details>
+        <summary>支教地点在哪里？要去多久？</summary>
+        <p>历年支教地以贵州为主，去过织金、纳雍、金沙、松桃、丹寨等地；<strong>2026 年的支教地在河南</strong>。暑期支教约需连续 17 天。<strong>当年的具体地点和日期以公众号通知为准</strong>，每年可能不同。</p>
+      </details>
+
+      <details>
+        <summary>需要自己承担费用吗？</summary>
+        <p>以队员自费为主，学校会有一部分补贴。具体的补贴额度和自付范围每年不同。</p>
+      </details>
+
+      <details>
+        <summary>只招华南理工大学的学生吗？</summary>
+        <p>目前只招华南理工大学的学生。其他高校的同学也可以先报名，届时我们会视情况做调整。</p>
+      </details>
+
+      <details>
+        <summary>会有志愿时吗？</summary>
+        <p>有。爱西会为参与的队员登记志愿时。</p>
+      </details>
+
+      <details>
+        <summary>如果这次没有通过，还能报名参加爱西吗？</summary>
+        <p>可以，欢迎你在下一届招新的时候继续报名。</p>
+      </details>
+
+      <details>
+        <summary>提交之后怎么查进度？</summary>
+        <p>提交成功后会给你一个 8 位凭证码，请截图保存。凭「邮箱 + 凭证码」在<a href="status.html">查询进度</a>页面可以随时查看状态、补传简历。面试通知和录取结果也会发到你填写的邮箱。</p>
+      </details>
+    </section>
+
+  </div>
+
+</div>
+
+<!-- ============ 表单 ============ -->
+<section class="form-block">
+  <div id="formHost"></div>
+</section>
+
+<footer class="site-footer">
+  <div class="ft-inner">
+    <div class="ft-brand">
+      <img src="images/left-8.png" alt="爱西支教协会" class="ft-logo">
+      <div class="ft-slogan">
+        爱西支教协会 &nbsp;|&nbsp; WE ARE ALL THE SAME<br>
+        十八年来，爱西在祖国西部留下了一串串爱的脚印
+      </div>
+    </div>
+    <div class="ft-links">
+      <a href="index.html">回到首页</a>
+      <a href="stories.html">支教现场</a>
+      <a href="status.html">查询进度</a>
+      <a href="privacy.html">隐私声明</a>
+      <a href="admin.html" style="opacity:.75;">领队入口</a>
+    </div>
+  </div>
+  <div class="ft-bottom">华南理工大学 · 爱西支教协会，创立于 2008 年<span data-icp></span></div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cloud.js"></script>
+<script src="js/schema.js"></script>
+<script src="js/forms.js"></script>
+<script src="js/apply.js"></script>
+<script src="js/beian.js"></script>
+</body>
+</html>
